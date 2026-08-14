@@ -1,0 +1,7 @@
+# 敏感配置（含明文密码/token）
+拉取需求/requirement-config.json
+拉取需求/requirements.json
+
+# Python
+__pycache__/
+*.pyc
