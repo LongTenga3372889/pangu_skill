@@ -7,6 +7,9 @@
 拉取需求/requirements.json
 拉取脚本/db-config.json
 
+# 机器相关的输出位置配置（模板见 sync-config.example.json）
+拉取脚本/sync-config.json
+
 # 环境变量文件（保留模板）
 .env
 .env.*

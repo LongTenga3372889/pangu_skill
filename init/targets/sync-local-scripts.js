@@ -117,15 +117,17 @@ async function stepConfig(ctx) {
 
 /** [4] 输出目录 */
 function stepDirs(ctx) {
-  const { PROJECT_ROOT, BASE_DIR, MAIDIAN_DIR, DULI_DIR } = paths();
+  const p = paths();
+
   info(`工作目录: ${process.cwd()}`);
-  info(`项目根:   ${PROJECT_ROOT}`);
-  info(`输出目录: ${BASE_DIR}${process.env.PANGU_JS_DIR ? '   (PANGU_JS_DIR 覆盖已生效)' : ''}`);
+  info(`解析来源: ${p.BASE_DIR_SOURCE}`);
+  info(`输出目录: ${p.BASE_DIR}`);
+
   if (ctx.options.check) {
     info('检查模式，不创建目录');
     return;
   }
-  for (const dir of [MAIDIAN_DIR, DULI_DIR]) {
+  for (const dir of [p.MAIDIAN_DIR, p.DULI_DIR]) {
     const existed = fs.existsSync(dir);
     fs.mkdirSync(dir, { recursive: true });
     ok(`${dir}${existed ? '  (已存在)' : '  (已创建)'}`);
@@ -219,13 +221,14 @@ module.exports = {
     { title: '同步状态迁移', run: stepMigrate },
   ],
   result(ctx) {
-    const { BASE_DIR } = paths();
+    const { BASE_DIR, BASE_DIR_SOURCE } = paths();
     const ready = ctx.depsReady && !!ctx.cfg && ctx.connOk;
     const lines = [
       `依赖:     ${ctx.depsReady ? '就绪' : '未就绪'}`,
       `配置:     ${ctx.cfg ? '就绪' : '未就绪'}`,
       `数据库:   ${ctx.connOk ? '连通' : '未验证'}`,
       `输出目录: ${BASE_DIR}`,
+      `解析来源: ${BASE_DIR_SOURCE}`,
     ];
     if (ready) lines.push('', '下一步: node 拉取脚本/sync_scripts.js');
     return { ready, lines };

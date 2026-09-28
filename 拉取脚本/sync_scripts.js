@@ -5,7 +5,7 @@ const path = require('path');
 const FORCE_FULL = process.argv.includes('--force');
 
 // 输出目录解析集中在 lib/paths.js，保证 init 与 sync 报告的是同一个目录
-const { PROJECT_ROOT, BASE_DIR, MAIDIAN_DIR, DULI_DIR } = require('./lib/paths');
+const { PROJECT_ROOT, BASE_DIR, BASE_DIR_SOURCE, MAIDIAN_DIR, DULI_DIR } = require('./lib/paths');
 
 const DB_CONFIG_FILE = path.join(__dirname, 'db-config.json');
 
@@ -166,7 +166,8 @@ async function syncScripts(conn, label, tableCode, opts, dir, tenantNameMap) {
 
 async function main() {
   console.log(`脚本输出目录: ${BASE_DIR}`);
-  console.log(`  项目根: ${PROJECT_ROOT}${process.env.PANGU_JS_DIR ? '  (PANGU_JS_DIR 覆盖已生效)' : ''}`);
+  console.log(`  解析来源: ${BASE_DIR_SOURCE}`);
+  console.log(`  项目根:   ${PROJECT_ROOT}`);
   const conn = await mysql.createConnection(loadDbConfig());
   console.log('已连接 dev 数据库');
 
