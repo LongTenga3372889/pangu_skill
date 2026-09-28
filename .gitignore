@@ -1,7 +1,61 @@
-# 敏感配置（含明文密码/token）
+# ============================================================
+# 敏感文件 —— 一律禁止提交
+# ============================================================
+
+# 本项目凭据配置（含明文密码 / token）
 拉取需求/requirement-config.json
 拉取需求/requirements.json
+拉取脚本/db-config.json
 
-# Python
-__pycache__/
-*.pyc
+# 环境变量文件（保留模板）
+.env
+.env.*
+*.env
+!.env.example
+!*.env.example
+
+# 私钥 / 密钥库
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+*.ppk
+*.asc
+
+# SSH 私钥（公钥 .pub 允许提交）
+id_rsa*
+id_dsa*
+id_ecdsa*
+id_ed25519*
+!*.pub
+
+# 云 / 容器 / CLI 凭据
+.kube/
+.aws/
+.azure/
+gcloud/
+*.kubeconfig
+.npmrc
+.pypirc
+.netrc
+
+# 常见密钥文件命名（模板请用 example 命名）
+*secret*.json
+*secret*.yaml
+*secret*.yml
+*credential*.json
+*credential*.yaml
+*credential*.yml
+*.token
+*.jwt
+
+# Node 依赖
+node_modules/
+
+# 脚本同步产物（若在技能仓库内误执行会生成，禁止提交）
+js/marmot/
+
+# JetBrains IDE
+.idea/

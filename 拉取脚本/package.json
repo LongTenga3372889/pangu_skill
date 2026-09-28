@@ -1,0 +1,14 @@
+{
+  "name": "sync-local-scripts",
+  "version": "1.0.0",
+  "description": "从 dev 数据库同步 Marmot 脚本到本地",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "sync": "node sync_scripts.js",
+    "sync:force": "node sync_scripts.js --force"
+  },
+  "dependencies": {
+    "mysql2": "^3.23.2"
+  }
+}

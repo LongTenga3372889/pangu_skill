@@ -1,0 +1,12 @@
+{
+  "name": "pangu-skill",
+  "version": "1.0.0",
+  "description": "盘古项目客户诉求处理技能包",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "init": "node init.js",
+    "init:check": "node init.js --check",
+    "init:list": "node init.js --list"
+  }
+}
