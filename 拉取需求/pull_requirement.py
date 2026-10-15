@@ -93,6 +93,35 @@ def pull_issue_detail(token, project_id, issue_id):
     return None
 
 
+def pull_issue_comments(token, project_id, issue_id, detail=None):
+    """读取需求评论。
+
+    必须走专用端点：detail 接口的 issueCommentVOList 实测不可靠（有评论时也可能返回空）。
+    端点返回 200 时以它为准；异常时退回 detail 的 issueCommentVOList；两者都拿不到返回 None。
+    """
+    eid = quote(issue_id, safe='')
+    try:
+        r = requests.get(
+            f"{GATEWAY}/agile/v1/projects/{project_id}/issue_comment/{eid}",
+            headers={"Authorization": "bearer " + token}, timeout=30)
+        if r.status_code == 200:
+            return r.json() or []
+    except Exception:
+        pass
+    if detail is not None:
+        return detail.get("issueCommentVOList") or []
+    return None
+
+
+def pull_sub_issues(issue_id, issues=None, detail=None):
+    """子任务：优先在 work_list 里按 parentId 反查，退回 detail 的 subIssueVOList。"""
+    subs = [i for i in (issues or [])
+            if i.get("parentId") and str(i.get("parentId")) == str(issue_id)]
+    if not subs and detail is not None:
+        subs = detail.get("subIssueVOList") or []
+    return subs
+
+
 def html_to_text(desc):
     if not desc:
         return ""
@@ -137,7 +166,7 @@ def print_list(issues):
         print(f"{iss.get('issueNum')}\t{iss.get('typeCode')}\t{status}\t{iss.get('summary')}")
 
 
-def print_detail(d):
+def print_detail(d, comments=None, subs=None):
     print(f"需求编号: {d.get('issueNum')}")
     print(f"标题: {d.get('summary')}")
     print(f"类型: {d.get('issueTypeVO', {}).get('name') if isinstance(d.get('issueTypeVO'), dict) else d.get('typeCode')}")
@@ -158,17 +187,26 @@ def print_detail(d):
             for t in ocr_image(url):
                 print(f"  {t}")
 
-    comments = d.get("issueCommentVOList") or []
-    if comments:
+    if comments is None:
+        print("\n=== 评论 ===\n  （拉取失败，未能确认是否有评论，请人工核对）")
+    elif comments:
         print(f"\n=== 评论 ({len(comments)} 条) ===")
         for c in comments:
-            print(f"  [{c.get('creationDate')}] {c.get('userName')}: {html_to_text(c.get('commentContent'))}")
+            who = c.get("userRealName") or c.get("userName") or c.get("userId")
+            when = c.get("lastUpdateDate") or c.get("creationDate")
+            body = c.get("commentText") or c.get("commentContent") or ""
+            print(f"\n  [{when}] {who}:")
+            for line in html_to_text(body).splitlines():
+                print(f"    {line}")
+    else:
+        print("\n=== 评论 ===\n  （无）")
 
-    subs = d.get("subIssueVOList") or []
     if subs:
         print(f"\n=== 子任务 ({len(subs)} 个) ===")
         for s in subs:
             print(f"  {s.get('issueNum')} {s.get('summary')}")
+    else:
+        print("\n=== 子任务 ===\n  （无）")
 
 
 def main():
@@ -222,7 +260,9 @@ def main():
             return
         detail = pull_issue_detail(token, project_id, issue_id)
         if detail:
-            print_detail(detail)
+            comments = pull_issue_comments(token, project_id, issue_id, detail)
+            subs = pull_sub_issues(issue_id, issues, detail)
+            print_detail(detail, comments, subs)
         else:
             print(f"拉取详情失败 {target_num}", file=sys.stderr)
     else:
